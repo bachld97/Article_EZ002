@@ -1,3 +1,6 @@
+![header](https://github.com/SezorusArticles/Article_EZ002/blob/master/Images/header.jpg)
+<br><br>
+
 # Understanding AVAssetResourceLoaderDelegate
 
 Most people want to save time, money and other resources in regards to all aspects of life. However, in this article, we will talk about the software development for the iOS platform. So all these moments are right for Users of the mobile Applications too. An app should look nice, does something useful and provide feedback as fast as possible. But usually, a lot of in App contents are somewhere in a Cloud. So we need to load them first, at least some part... maybe just a few bits at the beginning. There're many types of services which provide access to online video, different podcasts, and music. Or maybe chatting App with an ability to send short video messages. All should work fast or at least looks like so.
