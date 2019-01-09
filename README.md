@@ -1,4 +1,4 @@
-![header](https://github.com/SezorusArticles/Article_EZ002/blob/master/Images/header.jpg)
+![header](https://github.com/SezorusArticles/Article_EZ002/blob/master/Images/header1.jpg)
 <br><br>
 
 # Understanding AVAssetResourceLoaderDelegate
