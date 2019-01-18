@@ -11,6 +11,16 @@ import AVFoundation
 
 class SimpleExportViewController: VideoViewController {
     
+    // MARK: - Properties
+    
+    private var exporter: AVAssetExportSession?
+    
+    // MARK: - Life Cycle Methods
+    
+    deinit {
+        self.exporter?.cancelExport()
+    }
+    
     // MARK: - Private Methods
     
     override func createPlayer() -> MediaPlayer {
@@ -59,6 +69,7 @@ class SimpleExportViewController: VideoViewController {
             return
         }
         
+        self.exporter = exporter
         let fileName = asset.url.lastPathComponent
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
         let outputURL = documentsDirectory.appendingPathComponent(fileName)

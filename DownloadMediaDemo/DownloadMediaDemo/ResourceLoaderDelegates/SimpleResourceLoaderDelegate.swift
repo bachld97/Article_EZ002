@@ -33,11 +33,11 @@ class SimpleResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     
     // MARK: Private
     
-    private let url: URL
-    private var infoResponse: URLResponse?
-    private lazy var mediaData = Data()
+    private let url:            URL
+    private var infoResponse:   URLResponse?
+    private var urlSession:     URLSession?
+    private lazy var mediaData  = Data()
     private var loadingRequests = [AVAssetResourceLoadingRequest]()
-    private var urlSession: URLSession?
     
     // MARK: - Life Cycle Methods
     
@@ -64,7 +64,6 @@ class SimpleResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
         }
         
         self.loadingRequests.append(loadingRequest)
-        self.processRequests()
         
         return true
     }
@@ -109,7 +108,9 @@ class SimpleResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     
     private func createURLSession() -> URLSession {
         let config = URLSessionConfiguration.default
-        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        let operationQueue = OperationQueue()
+        operationQueue.maxConcurrentOperationCount = 1
+        return URLSession(configuration: config, delegate: self, delegateQueue: operationQueue)
     }
     
     private func invalidateURLSession() {
@@ -122,8 +123,6 @@ class SimpleResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     }
 
     private func fillInfoRequest(request: inout AVAssetResourceLoadingRequest, response: URLResponse) {
-        if !self.isInfo(request: request) { return }
-        
         request.contentInformationRequest?.isByteRangeAccessSupported = true
         request.contentInformationRequest?.contentType = response.mimeType
         request.contentInformationRequest?.contentLength = response.expectedContentLength
@@ -146,20 +145,26 @@ class SimpleResourceLoaderDelegate: NSObject, AVAssetResourceLoaderDelegate, URL
     }
     
     private func checkAndRespond(forRequest dataRequest: AVAssetResourceLoadingDataRequest) -> Bool {
-        let downloadedData = self.mediaData
-        let startOffset = dataRequest.currentOffset != 0 ? dataRequest.currentOffset : dataRequest.requestedOffset
+        let downloadedData          = self.mediaData
+        let downloadedDataLength    = Int64(downloadedData.count)
         
-        if Int64(downloadedData.count) < startOffset {
+        let requestRequestedOffset  = dataRequest.requestedOffset
+        let requestRequestedLength  = Int64(dataRequest.requestedLength)
+        let requestCurrentOffset    = dataRequest.currentOffset
+        
+        if downloadedDataLength < requestCurrentOffset {
             return false
         }
         
-        let unreadDataLength = Int64(downloadedData.count) - startOffset
-        let respondDataLength = min(Int64(dataRequest.requestedLength), unreadDataLength)
-        dataRequest.respond(with: downloadedData.subdata(in: Range(NSMakeRange(Int(startOffset), Int(respondDataLength)))!))
+        let downloadedUnreadDataLength  = downloadedDataLength - requestCurrentOffset
+        let requestUnreadDataLength     = requestRequestedOffset + requestRequestedLength - requestCurrentOffset
+        let respondDataLength           = min(requestUnreadDataLength, downloadedUnreadDataLength)
+
+        dataRequest.respond(with: downloadedData.subdata(in: Range(NSMakeRange(Int(requestCurrentOffset), Int(respondDataLength)))!))
         
-        let endOffset = startOffset + Int64(dataRequest.requestedLength)
+        let requestEndOffset = requestRequestedOffset + requestRequestedLength
         
-        return Int64(downloadedData.count) >= endOffset
+        return requestCurrentOffset >= requestEndOffset
     }
     
     private func saveMediaDataToLocalFile() -> URL? {

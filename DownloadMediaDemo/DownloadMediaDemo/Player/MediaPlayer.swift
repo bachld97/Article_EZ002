@@ -59,13 +59,14 @@ class MediaPlayer: NSObject {
             case .failed:
                 self.delegate?.mediaPlayer?(self, didFailWithError: self.player?.error)
             case .readyToPlay:
-                self.updateCurrentVideoDuration()
-                self.delegate?.mediaPlayer?(readyToPlay: self)
-                NotificationCenter.default.post(name: Notification.Name(rawValue: NotificationName.ReadyToPlay), object: nil)
-                if self.autoPlay {
-                    self.autoPlay = false
-                    _ = self.play()
-                }
+                self.updateCurrentVideoDuration(completion: {
+                    self.delegate?.mediaPlayer?(readyToPlay: self)
+                    NotificationCenter.default.post(name: Notification.Name(rawValue: NotificationName.ReadyToPlay), object: nil)
+                    if self.autoPlay {
+                        self.autoPlay = false
+                        _ = self.play()
+                    }
+                })
             default:
                 print("Media player in unknown state")
                 break
@@ -193,13 +194,22 @@ class MediaPlayer: NSObject {
         self.addStatusObserver()
     }
 
-    private func updateCurrentVideoDuration() {
+    private func updateCurrentVideoDuration(completion: @escaping ClosureVoid) {
         guard let player = self.player else { return }
         
-        if let asset = player.currentItem?.asset {
-            self.currentDuration = TimeInterval(CMTimeGetSeconds(asset.duration))
-        }
+        DispatchQueue.global().async(execute: {
+            if let asset = player.currentItem?.asset {
+                let duration = TimeInterval(CMTimeGetSeconds(asset.duration))
+                
+                DispatchQueue.main.async(execute: {
+                    self.currentDuration = duration
+                    completion()
+                })
+            }
+            
+        })
     }
+
     
     private func actualSeekToTime(_ completion: ClosureVoid? = nil) {
         self.isSeekInProgress = true
