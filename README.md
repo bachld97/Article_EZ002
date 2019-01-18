@@ -141,7 +141,9 @@ func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithErro
 ```swift
 func createURLSession() -> URLSession {
         let config = URLSessionConfiguration.default
-        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
+        let operationQueue = OperationQueue()
+        operationQueue.maxConcurrentOperationCount = 1
+        return URLSession(configuration: config, delegate: self, delegateQueue: operationQueue)
     }
 ```
 All received data we will save in the variable 
@@ -184,29 +186,34 @@ Logic looks like
 ![Img3](https://github.com/SezorusArticles/Article_EZ002/blob/master/Images/Img3.jpg)
 <br>
 Required steps:
-- Check the required start offset of the available data
 - Check with the length of downloaded data we can pass to the request
 - Respond with a chunk of data
 - Check if we sent all required data to the request, and finish it if so
 <br>
-In code, it looks much shorter<br>
+In code<br>
 
 ```swift
 func checkAndRespond(forRequest dataRequest: AVAssetResourceLoadingDataRequest) -> Bool {
-        let downloadedData = self.mediaData
-        let startOffset = dataRequest.currentOffset != 0 ? dataRequest.currentOffset : dataRequest.requestedOffset
+        let downloadedData          = self.mediaData
+        let downloadedDataLength    = Int64(downloadedData.count)
         
-        if Int64(downloadedData.count) < startOffset {
+        let requestRequestedOffset  = dataRequest.requestedOffset
+        let requestRequestedLength  = Int64(dataRequest.requestedLength)
+        let requestCurrentOffset    = dataRequest.currentOffset
+        
+        if downloadedDataLength < requestCurrentOffset {
             return false
         }
         
-        let unreadDataLength = Int64(downloadedData.count) - startOffset
-        let respondDataLength = min(Int64(dataRequest.requestedLength), unreadDataLength)
-        dataRequest.respond(with: downloadedData.subdata(in: Range(NSMakeRange(Int(startOffset), Int(respondDataLength)))!))
+        let downloadedUnreadDataLength  = downloadedDataLength - requestCurrentOffset
+        let requestUnreadDataLength     = requestRequestedOffset + requestRequestedLength - requestCurrentOffset
+        let respondDataLength           = min(requestUnreadDataLength, downloadedUnreadDataLength)
+
+        dataRequest.respond(with: downloadedData.subdata(in: Range(NSMakeRange(Int(requestCurrentOffset), Int(respondDataLength)))!))
         
-        let endOffset = startOffset + Int64(dataRequest.requestedLength)
+        let requestEndOffset = requestRequestedOffset + requestRequestedLength
         
-        return Int64(downloadedData.count) >= endOffset
+        return requestCurrentOffset >= requestEndOffset
     }
 ```
 
