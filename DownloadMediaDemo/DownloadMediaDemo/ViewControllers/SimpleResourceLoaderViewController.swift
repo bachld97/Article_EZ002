@@ -24,7 +24,7 @@ class SimpleResourceLoaderViewController: VideoViewController {
     // MARK: - Private Methods
     
     override func createPlayer() -> MediaPlayer {
-        guard let url = URL(string: "https://www.quirksmode.org/html5/videos/big_buck_bunny.mp4") else {
+        guard let url = URL(string: "https://www.radiantmediaplayer.com/media/bbb-360p.mp4") else {
             fatalError("Wrong video url.")
         }
         
