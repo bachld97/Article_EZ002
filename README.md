@@ -3,10 +3,9 @@
 
 # Understanding AVAssetResourceLoaderDelegate
 
-Most people want to save time, money and other resources in regards to all aspects of life. However, in this article, we will talk about the software development for the iOS platform. So all these moments are right for Users of the mobile Applications too. An app should look nice, does something useful and provide feedback as fast as possible. But usually, a lot of in App contents are somewhere in a Cloud. So we need to load them first, at least some part... maybe just a few bits at the beginning. There're many types of services which provide access to online video, different podcasts, and music. Or maybe chatting App with an ability to send short video messages. All should work fast or at least looks like so.
+Most people want to save time, money, and other resources in regards to all aspects of life. However, in this article, we will talk about software development for the iOS platform. So all these moments are right for Users of the mobile Applications too. An app should look nice, does something useful, and provide feedback as fast as possible. But usually, a lot of in App contents are somewhere in a Cloud. So we need to load them first, at least some part... maybe just a few bits at the beginning. There're many types of services which provide access to online video, different podcasts, and music. Or maybe chatting App with an ability to send short video messages. All should work fast or at least looks like so.
 
-Let's look about playing audio/video files from remote storage. A user can play the same track ten times a day. And he can fell in sleep while looking on loading activity if it appears every time. Or not, usually he deletes the App from the device. But we want to have the best App in the world. So let's make our users happy! And avoid loading state as possible. Load a data just once and cache it locally. You always have a chance to delete outdated and not actual data later.
-Let's begin with a simple case and research how we can deal with such tasks. For example, we have a short video record which can be viewed many times. In any case, we'll need to download it. At least once explicitly. Alternatively, it will do for you the 'black box' under the hood. We will use the *AVPlayer* to play this video file in this example.
+Let's look about playing audio/video files from remote storage. A user can play the same track ten times a day. And he can fell in sleep while looking on loading activity if it appears every time. Or not, usually he deletes the App from the device. But we want to have the best App in the world. So let's make our users happy! And avoid loading state as possible. Load data just once and cache it locally. You always have a chance to delete outdated and not actual data later. Let's begin with a simple case and research on how we can deal with such tasks. For example, we have a short video record which can be viewed many times. In any case, we'll need to download it. At least once explicitly. Alternatively, it will do for you the 'black box' under the hood. We will use the *AVPlayer* to play this video file in this example.
 
 #
 
@@ -45,7 +44,7 @@ func exportSession(forAsset asset: AVURLAsset) {
     }
 ```
 
-But what if we need a similar feature for a movie or podcast? A user can pause it and continue watching on the next day. It can be not enough time to download the whole file with *AVAssetExportSession*. So here we have *AVAssetResourceLoaderDelegate*. It can help us to implement similar logic as provides exporter and even more. 
+However, what if we need a similar feature for a movie or podcast? A user can pause it and continue watching on the next day. It can be not enough time to download the whole file with *AVAssetExportSession*. So here we have *AVAssetResourceLoaderDelegate*. It can help us to implement similar logic as provides exporter and even more. 
 
 Let's dive in it to understand how does it work, and how we can use it.
 Now we will talk about basics and a simple clone of the exporter. This example is not the optimal way. In the next article, we implement more interesting logic with *AVAssetResourceLoaderDelegate*.
@@ -173,7 +172,7 @@ func fillInfoRequest(request: inout AVAssetResourceLoadingRequest, response: URL
 ```
 And every time when we receive new data from data task we can check our saved origin *loadingRequests* and fill them with available data. And maybe finish some of them.
 <br><br>
-For example, we have these case. Some data already downloaded. *AVAssetResourceLoadingDataRequest* has some *requestedOffset* and *requestedLength*. Also we already sent some data to it, so *currentOffset* is not 0 too.
+For example, we have this case. Some data already downloaded. *AVAssetResourceLoadingDataRequest* has some *requestedOffset* and *requestedLength*. Also, we already sent some data to it, so *currentOffset* is not 0 too.
 Looks like on the diagram
 <br>
 
@@ -251,7 +250,7 @@ func saveMediaDataToLocalFile() -> URL? {
 
 ## We are done!
 
-That's all with basics of the *AVAssetResourceLoaderDelegate*. We understand how does it work and how to deal with it. You can try the Demo project.<br>
+That's all with the basics of the *AVAssetResourceLoaderDelegate*. We understand how does it work and how to deal with it. You can try the Demo project.<br>
 
 ### Author
 Yevhenii(Eugene) Zozulia
