@@ -252,7 +252,6 @@ func saveMediaDataToLocalFile() -> URL? {
 ## We are done!
 
 That's all with basics of the *AVAssetResourceLoaderDelegate*. We understand how does it work and how to deal with it. You can try the Demo project.<br>
-Now we can create something more useful for the real project. Let's do it in the next article.
 
 ### Author
 Yevhenii(Eugene) Zozulia
